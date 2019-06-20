@@ -23,9 +23,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "tslib.h"
-#include "base/mem.h"
+#include "tkc/mem.h"
 #include "base/keys.h"
-#include "base/thread.h"
+#include "tkc/thread.h"
 #include "tslib_thread.h"
 
 typedef struct _run_info_t {
@@ -65,7 +65,7 @@ static ret_t tslib_dispatch_one_event(run_info_t* info) {
       req->event.type = EVT_POINTER_MOVE;
     } else {
       req->event.type = EVT_POINTER_DOWN;
-      req->pointer_event.pressed = 1;
+      req->pointer_event.pressed = TRUE;
     }
   } else {
     if (req->pointer_event.pressed) {
@@ -78,13 +78,12 @@ static ret_t tslib_dispatch_one_event(run_info_t* info) {
 }
 
 void* tslib_run(void* ctx) {
-  run_info_t* info = (run_info_t*)ctx;
+  run_info_t info = *(run_info_t*)ctx;
 
-  while (tslib_dispatch_one_event(info) == RET_OK)
+  TKMEM_FREE(ctx);
+  while (tslib_dispatch_one_event(&info) == RET_OK)
     ;
-
-  ts_close(info->ts);
-  TKMEM_FREE(info);
+  ts_close(info.ts);
 
   return NULL;
 }
@@ -97,10 +96,10 @@ static run_info_t* info_dup(run_info_t* info) {
   return new_info;
 }
 
-thread_t* tslib_thread_run(const char* filename, input_dispatch_t dispatch, void* ctx,
-                           int32_t max_x, int32_t max_y) {
+tk_thread_t* tslib_thread_run(const char* filename, input_dispatch_t dispatch, void* ctx,
+                              int32_t max_x, int32_t max_y) {
   run_info_t info;
-  thread_t* thread = NULL;
+  tk_thread_t* thread = NULL;
   return_value_if_fail(filename != NULL && dispatch != NULL, NULL);
 
   memset(&info, 0x00, sizeof(info));
@@ -114,9 +113,9 @@ thread_t* tslib_thread_run(const char* filename, input_dispatch_t dispatch, void
   return_value_if_fail(info.ts != NULL, NULL);
   ts_config(info.ts);
 
-  thread = thread_create(tslib_run, info_dup(&info));
+  thread = tk_thread_create(tslib_run, info_dup(&info));
   if (thread != NULL) {
-    thread_start(thread);
+    tk_thread_start(thread);
   } else {
     ts_close(info.ts);
   }

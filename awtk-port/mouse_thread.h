@@ -1,7 +1,7 @@
 ﻿/**
- * File:   tslib_thread_test.c
+ * File:   mouse_thread.h
  * Author: AWTK Develop Team
- * Brief:  test tslib thread
+ * Brief:  thread to read /dev/input/
  *
  * Copyright (c) 2018 - 2018  Guangzhou ZHIYUAN Electronics Co.,Ltd.
  *
@@ -19,18 +19,17 @@
  *
  */
 
-#include "tslib_thread.h"
+#ifndef TK_MOUSE_THREAD_H
+#define TK_MOUSE_THREAD_H
 
-int main(int argc, char* argv[]) {
-  tk_thread_t* thread = NULL;
-  if (argc < 2) {
-    printf("%s filename\n", argv[0]);
-    return 0;
-  }
+#include "tkc/thread.h"
+#include "input_dispatcher.h"
 
-  thread = tslib_thread_run(argv[1], input_dispatch_print, NULL, 320, 480);
+BEGIN_C_DECLS
 
-  tk_thread_join(thread);
+tk_thread_t* mouse_thread_run(const char* filename, input_dispatch_t dispatch, void* ctx,
+                              int32_t max_x, int32_t max_y);
 
-  return 0;
-}
+END_C_DECLS
+
+#endif /*TK_MOUSE_THREAD_H*/

@@ -1,6 +1,3 @@
-
-
-
 # AWTK针对arm-linux平台的移植。
 
 [AWTK](https://github.com/zlgopen/awtk)是为嵌入式系统开发的GUI引擎库。
@@ -14,10 +11,10 @@
 * 1.获取源码
 
 ```
+git clone https://github.com/zlgopen/awtk.git
+git clone https://github.com/zlgopen/awtk-examples.git
 git clone https://github.com/zlgopen/awtk-linux-fb.git
 cd awtk-linux-fb
-git clone https://github.com/zlgopen/awtk.git
-
 ```
 
 * 2.编辑SConstruct设置工具链的路径
@@ -38,15 +35,27 @@ TOOLS_PREFIX='/opt/28x/gcc-4.4.4-glibc-2.11.1-multilib-1.0/arm-fsl-linux-gnueabi
 
 * 4.编译(请先安装scons)
 
+生成内置 demoui 例子，生成结果在 build/bin 文件夹下的 demoui 文件
+
 ```
 scons
 ```
 
+也可以指定生成其他 Demo，生成结果在 build/bin 文件夹下的 demo 文件
+
+```
+scons APP=../awtk-examples/HelloWorld-Demo
+```
+
 * 5.生成发布包
+
+对于内置的 demoui 例子
 
 ```
 ./release.sh
 ```
+
+对于其他 Demo，需要手工拷贝 Demo 的资源文件夹到 build/bin 内，再执行 release.sh
 
 * 6.运行
 
@@ -54,7 +63,26 @@ scons
 
 ```
 ./release/bin/demoui
+./release/bin/demo
 ```
 
+## 其他问题
 
+#### 修改项目路径
+
+默认情况下，scons 脚本假设以下文件夹在同一个目录
+
+```
+zlgopen
+  |-- awtk
+  |-- awtk-examples
+  |-- awtk-linux-fb
+```
+
+如果实际存放的路径与默认不同，则需要修改以下 awtk-linux-fb/SConstruct 代码，例如：
+
+```
+TK_ROOT = joinPath(os.getcwd(), '../awtk')
+APP_ROOT=joinPath(os.getcwd(), '../awtk-examples/HelloWorld-Demo')
+```
 
